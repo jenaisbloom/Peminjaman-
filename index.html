@@ -18,15 +18,20 @@
   </select>
 
   <input type="text" id="username" placeholder="Username" />
-  <div class="password-wrapper">
-  <input type="password" id="password" placeholder="Password" minlength="8" />
-  
-  <span class="eye" onclick="togglePassword()">
-    <span class="eye-outer"></span>
-    <span class="eye-inner"></span>
-  </span>
-</div>
+  <input type="password" id="password" placeholder="Password" min="8" />
 
+ <span 
+    onclick="togglePassword()" 
+    style="
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+    "
+  >
+   
+  </span>
 
   <button id="btnLogin">Masuk</button>
 </div>
