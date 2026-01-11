@@ -1,6 +1,4 @@
-/* =========================
-   UTIL
-========================= */
+
 function getLS(key, fallback) {
   const raw = localStorage.getItem(key);
   if (!raw) return fallback;
@@ -15,10 +13,6 @@ function daysBetween(dateStartStr, dateEndStr) {
   const diff = end - start;
   return diff / (1000 * 60 * 60 * 24);
 }
-
-/* =========================
-   INIT DATA (BARANG)
-========================= */
 function initBarang() {
   if (!localStorage.getItem("barang")) {
     setLS("barang", [
@@ -29,9 +23,6 @@ function initBarang() {
   }
 }
 
-/* =========================
-   AUTH / ROLE
-========================= */
 function requireRole(roleNeeded) {
   const role = localStorage.getItem("role");
   if (role !== roleNeeded) {
@@ -44,9 +35,6 @@ function logout() {
   window.location.href = "index.html";
 }
 
-/* =========================
-   LOGIN
-========================= */
 function handleLogin() {
   const role = document.getElementById("role").value.trim();
   const user = document.getElementById("username").value.trim();
@@ -56,15 +44,12 @@ function handleLogin() {
     alert("Lengkapi data login");
     return;
   }
-
-  // ADMIN (fix)
   if (role === "admin" && user === "admin" && pass === "admin123") {
     localStorage.setItem("role", "admin");
     window.location.href = "admin.html";
     return;
   }
 
-  // PEMINJAM (password saja)
   if (role === "peminjam" && pass === "peminjam123") {
     localStorage.setItem("role", "peminjam");
     window.location.href = "peminjam.html";
@@ -73,10 +58,6 @@ function handleLogin() {
 
   alert("Login gagal. Cek role/username/password.");
 }
-
-/* =========================
-   PEMINJAM - AJUKAN
-========================= */
 function tambahPeminjaman() {
   const nama = document.getElementById("namaPeminjam").value.trim();
   const telp = document.getElementById("telpPeminjam").value.trim();
@@ -88,7 +69,6 @@ function tambahPeminjaman() {
 
   const jumlah = parseInt(jumlahStr, 10);
 
-  // validasi wajib isi
   if (!nama || !telp || !alamat || !barangNama || !jumlahStr || !tglPinjam || !tglKembali) {
     alert("Semua data wajib diisi.");
     return;
@@ -98,7 +78,6 @@ function tambahPeminjaman() {
     return;
   }
 
-  // validasi max 3 hari
   const lama = daysBetween(tglPinjam, tglKembali);
   if (lama < 0) {
     alert("Tanggal kembali tidak boleh lebih awal dari tanggal pinjam.");
@@ -109,7 +88,6 @@ function tambahPeminjaman() {
     return;
   }
 
-  // cek stok
   const barangList = getLS("barang", []);
   const barang = barangList.find(b => b.nama === barangNama);
   if (!barang) {
@@ -121,7 +99,6 @@ function tambahPeminjaman() {
     return;
   }
 
-  // simpan peminjaman & kurangi stok
   const peminjaman = getLS("peminjaman", []);
   peminjaman.push({
     peminjam: nama,
@@ -141,7 +118,6 @@ function tambahPeminjaman() {
 
   alert("Peminjaman berhasil diajukan.");
 
-  // bersihkan form (biar enak)
   document.getElementById("namaPeminjam").value = "";
   document.getElementById("telpPeminjam").value = "";
   document.getElementById("alamatPeminjam").value = "";
@@ -151,9 +127,6 @@ function tambahPeminjaman() {
   document.getElementById("tglKembali").value = "";
 }
 
-/* =========================
-   ADMIN - TAMPIL & KEMBALIKAN
-========================= */
 function renderStok() {
   const tbody = document.getElementById("tabelBarang");
   const barangList = getLS("barang", []);
@@ -199,7 +172,6 @@ function renderAdmin() {
   renderPeminjaman();
 }
 
-// supaya bisa dipanggil dari onclick (di HTML)
 window.kembalikan = function(index) {
   const peminjaman = getLS("peminjaman", []);
   const barangList = getLS("barang", []);
@@ -209,10 +181,8 @@ window.kembalikan = function(index) {
 
   if (data.status !== "Dipinjam") return;
 
-  // ubah status
   data.status = "Dikembalikan";
 
-  // tambah stok kembali
   const barang = barangList.find(b => b.nama === data.barang);
   if (barang) barang.stok += parseInt(data.jumlah, 10);
 
@@ -230,34 +200,27 @@ function resetData() {
   renderAdmin();
 }
 
-/* =========================
-   PAGE INIT
-========================= */
 document.addEventListener("DOMContentLoaded", () => {
   initBarang();
 
   const page = document.body.getAttribute("data-page");
 
-  // index/login page
   const btnLogin = document.getElementById("btnLogin");
   if (btnLogin) {
     btnLogin.addEventListener("click", handleLogin);
   }
 
-  // logout button (admin & peminjam)
   const btnLogout = document.getElementById("btnLogout");
   if (btnLogout) {
     btnLogout.addEventListener("click", logout);
   }
 
-  // peminjam page
   if (page === "peminjam") {
     requireRole("peminjam");
     const btnAjukan = document.getElementById("btnAjukan");
     btnAjukan.addEventListener("click", tambahPeminjaman);
   }
 
-  // admin page
   if (page === "admin") {
     requireRole("admin");
     renderAdmin();
@@ -265,4 +228,5 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnReset = document.getElementById("btnReset");
     if (btnReset) btnReset.addEventListener("click", resetData);
   }
+
 });
